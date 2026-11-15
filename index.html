@@ -23,31 +23,29 @@
 
     <main id="main-content" class="container">
         <h1>Arduino Weather Station Project</h1>
-        <p class="intro">Project aims to gather wind information from an Arduino-based weather station.</p>
+        <p class="intro">This project aims to gather wind information from an Arduino-based weather station.</p>
 
         <section aria-labelledby="overview-heading">
             <h2 id="overview-heading">Overview</h2>
             <p>
-                Add the purpose/motivation.
+                Having accurate information about local weather conditions is important for keeping people safe. 
+                Inspired by airport Automated Weather Observing Systems (AWOS) and the National Weather Service’s SKYWARN Storm Spotter Program, our project aims to build a weather station that measures and reports conditions to support informed decisions in aviation and severe weather preparedness.
             </p>
         </section>
 
-        <section aria-labelledby="connect-heading">
-            <h2 id="connect-heading">Live Connection</h2>
-            <div class="controls">
-                <button type="button" id="connect-btn">Connect to Arduino</button>
-                <button type="button" id="disconnect-btn" class="secondary" disabled>Disconnect</button>
-                <label for="baud">Baud rate</label>
-                <select id="baud">
-                    <option value="9600" selected>9600</option>
-                    <option value="19200">19200</option>
-                    <option value="57600">57600</option>
-                    <option value="115200">115200</option>
-                </select>
-                <span id="status" class="status" role="status" aria-live="polite">Not connected</span>
-            </div>
+        <section aria-labelledby="status-heading">
+            <h2 id="status-heading">Live Status</h2>
             <p>
-                <button type="button" id="download-btn" class="secondary" disabled>Download all readings (CSV)</button>
+                Readings are sent by the weather station to ThingSpeak and this
+                page refreshes automatically every 20 seconds.
+            </p>
+            <p>
+                <span id="status" class="status" role="status" aria-live="polite">Loading latest data&hellip;</span>
+            </p>
+            <p>
+                <a class="button secondary" id="download-btn"
+                   href="https://api.thingspeak.com/channels/3580074/feeds.csv?results=8000"
+                   download="weather_station_readings.csv">Download all readings (CSV)</a>
             </p>
         </section>
 
@@ -56,6 +54,11 @@
             <p>
                 Wind speed and wind direction measurements. Validation and
                 error analysis are in progress.
+            </p>
+            <p>
+                Wind speed measurements will be prioritized for processing, validation, and error analysis.
+                Additional readings, such as temperature and pressure, will enhance the station’s weather reporting 
+                and help prototype and test the data collection process from the Arduino to the website.
             </p>
 
             <div class="cards">
@@ -88,7 +91,7 @@
                         </tr>
                     </thead>
                     <tbody id="wind-log">
-                        <tr><td colspan="3">No data yet. Connect your Arduino to begin.</td></tr>
+                        <tr><td colspan="3">No wind sensor connected yet.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -115,7 +118,7 @@
                 <div class="card">
                     <h3>Pressure</h3>
                     <p class="reading"><span id="live-pressure">&mdash;</span> <span class="unit">hPa</span></p>
-                    <p class="note" id="live-pressure-inhg"></p>
+                    <p class="note" id="live-pressure-inhg">No pressure sensor yet</p>
                 </div>
                 <div class="card">
                     <h3>Dew Point</h3>
@@ -125,10 +128,10 @@
                 <div class="card">
                     <h3>Altimeter Setting</h3>
                     <p class="reading"><span id="live-altimeter">&mdash;</span> <span class="unit">inHg</span></p>
-                    <p class="note" id="live-altimeter-hpa"></p>
+                    <p class="note" id="live-altimeter-hpa">Needs pressure sensor</p>
                 </div>
             </div>
-             
+
             <h3>Live charts (ThingSpeak)</h3>
             <div class="charts">
                 <iframe title="Temperature chart"
@@ -151,7 +154,7 @@
                         </tr>
                     </thead>
                     <tbody id="env-log">
-                        <tr><td colspan="6">No data yet. Connect your Arduino to begin.</td></tr>
+                        <tr><td colspan="6">Loading&hellip;</td></tr>
                     </tbody>
                 </table>
             </div>
