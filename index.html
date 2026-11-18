@@ -66,18 +66,6 @@
                     <h3>Wind Speed</h3>
                     <p class="reading"><span id="live-speed">&mdash;</span> <span class="unit">mph</span></p>
                 </div>
-                <div class="card">
-                    <h3>Wind Direction</h3>
-                    <p class="reading">
-                        <span id="live-dir">&mdash;</span>&deg;
-                        <span class="unit" id="live-compass"></span>
-                    </p>
-                    <div class="compass" aria-hidden="true">
-                        <div class="needle" id="needle"></div>
-                        <span class="n">N</span><span class="e">E</span>
-                        <span class="s">S</span><span class="w">W</span>
-                    </div>
-                </div>
             </div>
 
             <h3>Recent wind readings</h3>
@@ -87,7 +75,6 @@
                         <tr>
                             <th scope="col">Time</th>
                             <th scope="col">Wind speed (mph)</th>
-                            <th scope="col">Wind direction (&deg;)</th>
                         </tr>
                     </thead>
                     <tbody id="wind-log">
