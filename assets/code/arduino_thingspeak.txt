@@ -1,0 +1,105 @@
+#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiClient.h>
+#include <DHT.h>
+
+// ---------- Set to wifi information ----------
+const char* WIFI_SSID            = "Concord";
+const char* WIFI_PASSWORD        = "Cessna152";
+const char* THINGSPEAK_WRITE_KEY = "95B6UF62VJFV3HQD";
+// --------------------------------
+
+#define DHTPIN  D4
+#define DHTTYPE DHT11
+
+// ThingSpeak free accounts accept one update every 15 s; 20 s leaves margin.
+const unsigned long SEND_INTERVAL_MS = 20000;
+
+DHT dht(DHTPIN, DHTTYPE);
+unsigned long lastSend = 0;
+
+void connectWiFi() {
+  if (WiFi.status() == WL_CONNECTED) return;
+
+  Serial.print("Connecting to ");
+  Serial.print(WIFI_SSID);
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  unsigned long start = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - start < 20000) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.print("\nConnected, IP: ");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println("\nWiFi connect failed, will retry.");
+  }
+}
+
+void sendToThingSpeak(float tempC, float humidity) {
+  WiFiClient client;
+  HTTPClient http;
+
+  String url = "http://api.thingspeak.com/update?api_key=";
+  url += THINGSPEAK_WRITE_KEY;
+  url += "&field1=" + String(tempC, 1);
+  url += "&field2=" + String(humidity, 1);
+
+  if (!http.begin(client, url)) {
+    Serial.println("HTTP begin failed");
+    return;
+  }
+
+  int code = http.GET();
+  String body = http.getString();
+  http.end();
+
+  // ThingSpeak returns the new entry number, or "0" if the update was rejected
+  // (wrong key or sent too soon).
+  if (code == 200 && body != "0") {
+    Serial.print("Sent OK, entry #");
+    Serial.println(body);
+  } else {
+    Serial.print("Send failed, HTTP ");
+    Serial.print(code);
+    Serial.print(", response: ");
+    Serial.println(body);
+  }
+}
+
+void setup() {
+  Serial.begin(9600);
+  delay(100);
+  Serial.println("\nD1 Mini + DHT11 -> ThingSpeak");
+  dht.begin();
+  connectWiFi();
+}
+
+void loop() {
+  if (millis() - lastSend < SEND_INTERVAL_MS && lastSend != 0) return;
+  lastSend = millis();
+
+  connectWiFi();
+
+  float humidity = dht.readHumidity();
+  float tempC    = dht.readTemperature();
+
+  if (isnan(humidity) || isnan(tempC)) {
+    Serial.println("DHT11 read failed - check wiring.");
+    return;
+  }
+
+  Serial.print("Temp: ");
+  Serial.print(tempC, 1);
+  Serial.print(" C   Humidity: ");
+  Serial.print(humidity, 1);
+  Serial.println(" %");
+
+  if (WiFi.status() == WL_CONNECTED) {
+    sendToThingSpeak(tempC, humidity);
+  }
+}
