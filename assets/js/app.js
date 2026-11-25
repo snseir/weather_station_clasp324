@@ -18,7 +18,7 @@ const FETCH_ROWS = 200;                // > 180 entries per hour at one per 20 s
 
 // Station elevation (meters above sea level, including the roof height).
 // Needed for the altimeter setting. Leave as null until it is known.
-const STATION_ELEVATION_M = null;
+const STATION_ELEVATION_M = 182;
 
 const FEED_URL =
   `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?results=${FETCH_ROWS}`;
