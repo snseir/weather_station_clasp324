@@ -2,7 +2,7 @@
   Arduino Weather Station - live data from ThingSpeak
   The station uploads one entry every 20 s:
     field1 = Temperature (F)      field2 = Humidity (%)
-    field3 = Pressure (hPa)       field4 = Wind speed, 20-s average (mph)
+    field3 = Pressure (inHg)     field4 = Wind speed, 20-s average (mph)
     field5 = Peak gust in those 20 s (highest rolling 3-second average, mph)
   The channel must be public for this to work without an API key.
 
@@ -18,7 +18,7 @@ const FETCH_ROWS = 200;                // > 180 entries per hour at one per 20 s
 
 // Station elevation (meters above sea level, including the roof height).
 // Needed for the altimeter setting. Leave as null until it is known.
-const STATION_ELEVATION_M = null;
+const STATION_ELEVATION_M = 182;
 
 const FEED_URL =
   `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?results=${FETCH_ROWS}`;
@@ -41,6 +41,14 @@ function altimeterHpa(p, h) {
   const n = 0.190284;
   const k = Math.pow(1013.25, n) * 0.0065 / 288;
   return (p - 0.3) * Math.pow(1 + k * h / Math.pow(p - 0.3, n), 1 / n);
+}
+
+// field3 is sent in inHg. Older entries were in hPa (values ~1000), so convert those.
+// Everything inside this script works in hPa.
+function pressureHpa(v) {
+  const n = num(v);
+  if (n === null) return null;
+  return n > 100 ? n : n / 0.0295300;
 }
 
 function num(v) {
@@ -90,7 +98,7 @@ function updateCards(feeds) {
 
   const tF   = mean(hour.map((f) => num(f.field1)));
   const rh   = mean(hour.map((f) => num(f.field2)));
-  const p    = mean(hour.map((f) => num(f.field3)));
+  const p    = mean(hour.map((f) => pressureHpa(f.field3)));
   const wind = mean(hour.map((f) => num(f.field4)));
   const gust = maxOf(hour.map((f) => num(f.field5)));
 
@@ -108,10 +116,10 @@ function updateCards(feeds) {
 
   $("avg-humidity").textContent = fmt(rh, 0);
 
-  $("avg-pressure").textContent = fmt(p);
+  $("avg-pressure").textContent = p === null ? "—" : fmt(hPaToInHg(p), 2);
   $("avg-pressure-inhg").textContent = p === null
     ? "Station pressure, 60-min average"
-    : `${fmt(hPaToInHg(p), 2)} inHg · station pressure, 60-min average`;
+    : `${fmt(p)} hPa · station pressure, 60-min average`;
 
   if (tF !== null && rh !== null && rh > 0) {
     const dpC = dewPointC(toC(tF), rh);
@@ -160,7 +168,7 @@ function updateTable(feeds) {
       fmt(num(f.field5)),
       fmt(tF),
       fmt(rh, 0),
-      fmt(num(f.field3)),
+      pressureHpa(f.field3) === null ? "—" : fmt(hPaToInHg(pressureHpa(f.field3)), 2),
       fmt(dpF),
     ];
 
@@ -179,9 +187,9 @@ async function refresh() {
     const res = await fetch(FEED_URL, { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    const feeds = (data.feeds || []).filter((f) =>
-      ["field1", "field2", "field3", "field4", "field5"].some((k) => num(f[k]) !== null)
-    );
+    const feeds = (data.feeds || [])
+      .filter((f) =>
+        ["field1", "field2", "field3", "field4", "field5"].some((k) => num(f[k]) !== null));
 
     if (feeds.length > 0) {
       lastReadingTime = new Date(feeds[feeds.length - 1].created_at);

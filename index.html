@@ -57,10 +57,10 @@
             <p>
                 Each box shows the <strong>average over the last 60 minutes</strong> of readings,
                 except Peak Gust, which shows the <strong>highest gust in the last 60 minutes</strong>.
-                <span id="hour-count"></span>
+                [<span id="hour-count"></span>]
             </p>
             <p class="note">
-                <strong>How gusts are measured:</strong> the station counts anemometer pulses every second.
+                <strong>How gusts are measured:</strong> the Arduino counts anemometer pulses every second.
                 A gust is the wind speed averaged over a rolling <strong>3-second</strong> window
                 (recomputed every second). Each 20-second upload reports the highest 3-second gust
                 in that 20 seconds, and the Peak Gust box shows the highest of those over the last hour.
@@ -94,7 +94,7 @@
                 </div>
                 <div class="card">
                     <h3>Pressure</h3>
-                    <p class="reading"><span id="avg-pressure">&mdash;</span> <span class="unit">hPa</span></p>
+                    <p class="reading"><span id="avg-pressure">&mdash;</span> <span class="unit">inHg</span></p>
                     <p class="note" id="avg-pressure-inhg">Station pressure, 60-min average</p>
                 </div>
                 <div class="card">
@@ -120,7 +120,7 @@
                 <iframe title="Humidity chart"
                     src="https://thingspeak.com/channels/3580074/charts/2?bgcolor=%23ffffff&color=%231f6fd6&dynamic=true&results=60&type=line&update=15&title=Humidity%20(%25)"></iframe>
                 <iframe title="Pressure chart"
-                    src="https://thingspeak.com/channels/3580074/charts/3?bgcolor=%23ffffff&color=%236a3d9a&dynamic=true&results=60&type=line&update=15&title=Pressure%20(hPa)"></iframe>
+                    src="https://thingspeak.com/channels/3580074/charts/3?bgcolor=%23ffffff&color=%236a3d9a&dynamic=true&results=60&type=line&update=15&title=Pressure%20(inHg)"></iframe>
             </div>
 
             <h3>Recent readings (every 20 s)</h3>
@@ -133,7 +133,7 @@
                             <th scope="col">Peak gust (mph, max 3-s in 20 s)</th>
                             <th scope="col">Temperature (&deg;F)</th>
                             <th scope="col">Humidity (%)</th>
-                            <th scope="col">Pressure (hPa)</th>
+                            <th scope="col">Pressure (inHg)</th>
                             <th scope="col">Dew point (&deg;F)</th>
                         </tr>
                     </thead>
