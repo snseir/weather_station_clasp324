@@ -1,28 +1,46 @@
 /*
   Arduino Weather Station - live data from ThingSpeak
-  Channel fields: field1 = Temperature (C), field2 = Humidity (%)
+  The station uploads one entry every 20 s:
+    field1 = Temperature (F)      field2 = Humidity (%)
+    field3 = Pressure (hPa)       field4 = Wind speed, 20-s average (mph)
+    field5 = Peak gust in those 20 s (highest rolling 3-second average, mph)
   The channel must be public for this to work without an API key.
+
+  The cards show averages over the last 60 minutes (Peak Gust shows the maximum).
 */
 
 const CHANNEL_ID = 3580074;
-const REFRESH_MS = 20000;   // how often the page checks for new data
-const TABLE_ROWS = 20;      // rows shown in "Recent readings"
-const STALE_MS   = 2 * 60 * 1000; // warn if newest reading is older than this
+const REFRESH_MS = 20000;              // how often the page checks for new data
+const TABLE_ROWS = 20;                 // rows shown in "Recent readings"
+const STALE_MS   = 2 * 60 * 1000;      // warn if newest reading is older than this
+const WINDOW_MS  = 60 * 60 * 1000;     // averaging window for the cards (1 hour)
+const FETCH_ROWS = 200;                // > 180 entries per hour at one per 20 s
+
+// Station elevation (meters above sea level, including the roof height).
+// Needed for the altimeter setting. Leave as null until it is known.
+const STATION_ELEVATION_M = null;
 
 const FEED_URL =
-  `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?results=${TABLE_ROWS}`;
+  `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?results=${FETCH_ROWS}`;
 
 const $ = (id) => document.getElementById(id);
 
-function toF(c) {
-  return c * 9 / 5 + 32;
-}
+const toC = (f) => (f - 32) * 5 / 9;
+const toF = (c) => c * 9 / 5 + 32;
+const hPaToInHg = (p) => p * 0.0295300;
 
 // Dew point from temperature (C) and relative humidity (%) - Magnus formula
-function dewPoint(tC, rh) {
+function dewPointC(tC, rh) {
   const a = 17.62, b = 243.12;
   const g = Math.log(rh / 100) + (a * tC) / (b + tC);
   return (b * g) / (a - g);
+}
+
+// Altimeter setting (hPa) from station pressure (hPa) and elevation (m) - NWS formula
+function altimeterHpa(p, h) {
+  const n = 0.190284;
+  const k = Math.pow(1013.25, n) * 0.0065 / 288;
+  return (p - 0.3) * Math.pow(1 + k * h / Math.pow(p - 0.3, n), 1 / n);
 }
 
 function num(v) {
@@ -31,7 +49,17 @@ function num(v) {
 }
 
 function fmt(n, digits = 1) {
-  return n === null ? "—" : n.toFixed(digits);
+  return n === null || n === undefined ? "—" : n.toFixed(digits);
+}
+
+function mean(values) {
+  const v = values.filter((x) => x !== null);
+  return v.length ? v.reduce((s, x) => s + x, 0) / v.length : null;
+}
+
+function maxOf(values) {
+  const v = values.filter((x) => x !== null);
+  return v.length ? Math.max(...v) : null;
 }
 
 function timeAgo(ms) {
@@ -55,22 +83,54 @@ function updateStatus() {
     : `Live — last reading ${when} (${timeAgo(age)})`;
 }
 
-function updateCards(latest) {
-  const t = num(latest.field1);
-  const h = num(latest.field2);
+// Cards: averages over the last 60 minutes; gust = maximum over the last 60 minutes
+function updateCards(feeds) {
+  const cutoff = Date.now() - WINDOW_MS;
+  const hour = feeds.filter((f) => new Date(f.created_at).getTime() >= cutoff);
 
-  $("live-temp").textContent = fmt(t);
-  $("live-temp-f").textContent = t === null ? "" : `${fmt(toF(t))} °F`;
+  const tF   = mean(hour.map((f) => num(f.field1)));
+  const rh   = mean(hour.map((f) => num(f.field2)));
+  const p    = mean(hour.map((f) => num(f.field3)));
+  const wind = mean(hour.map((f) => num(f.field4)));
+  const gust = maxOf(hour.map((f) => num(f.field5)));
 
-  $("live-humidity").textContent = fmt(h, 0);
+  $("hour-count").textContent = hour.length
+    ? `(${hour.length} readings in the last 60 minutes.)`
+    : "(No readings in the last 60 minutes.)";
 
-  if (t !== null && h !== null && h > 0) {
-    const dp = dewPoint(t, h);
-    $("live-dewpoint").textContent = fmt(dp);
-    $("live-dewpoint-f").textContent = `${fmt(toF(dp))} °F`;
+  $("avg-wind").textContent = fmt(wind);
+  $("max-gust").textContent = fmt(gust);
+
+  $("avg-temp").textContent = fmt(tF);
+  $("avg-temp-c").textContent = tF === null
+    ? "60-min average"
+    : `${fmt(toC(tF))} °C · 60-min average`;
+
+  $("avg-humidity").textContent = fmt(rh, 0);
+
+  $("avg-pressure").textContent = fmt(p);
+  $("avg-pressure-inhg").textContent = p === null
+    ? "Station pressure, 60-min average"
+    : `${fmt(hPaToInHg(p), 2)} inHg · station pressure, 60-min average`;
+
+  if (tF !== null && rh !== null && rh > 0) {
+    const dpC = dewPointC(toC(tF), rh);
+    $("avg-dewpoint").textContent = fmt(toF(dpC));
+    $("avg-dewpoint-c").textContent = `${fmt(dpC)} °C · from 60-min average temp & humidity`;
   } else {
-    $("live-dewpoint").textContent = "—";
-    $("live-dewpoint-f").textContent = "";
+    $("avg-dewpoint").textContent = "—";
+    $("avg-dewpoint-c").textContent = "From 60-min average temp & humidity";
+  }
+
+  if (p !== null && STATION_ELEVATION_M !== null) {
+    const alt = altimeterHpa(p, STATION_ELEVATION_M);
+    $("avg-altimeter").textContent = fmt(hPaToInHg(alt), 2);
+    $("avg-altimeter-note").textContent = `${fmt(alt)} hPa · from 60-min average pressure`;
+  } else {
+    $("avg-altimeter").textContent = "—";
+    $("avg-altimeter-note").textContent = p === null
+      ? "From 60-min average pressure"
+      : "Needs station elevation (set in app.js)";
   }
 }
 
@@ -78,11 +138,11 @@ function updateTable(feeds) {
   const body = $("env-log");
   body.replaceChildren();
 
-  const rows = feeds.slice().reverse(); // newest first
+  const rows = feeds.slice(-TABLE_ROWS).reverse(); // newest first
   if (rows.length === 0) {
     const tr = document.createElement("tr");
     const td = document.createElement("td");
-    td.colSpan = 6;
+    td.colSpan = 7;
     td.textContent = "No readings yet.";
     tr.appendChild(td);
     body.appendChild(tr);
@@ -90,17 +150,18 @@ function updateTable(feeds) {
   }
 
   for (const f of rows) {
-    const t = num(f.field1);
-    const h = num(f.field2);
-    const dp = (t !== null && h !== null && h > 0) ? dewPoint(t, h) : null;
+    const tF = num(f.field1);
+    const rh = num(f.field2);
+    const dpF = (tF !== null && rh !== null && rh > 0) ? toF(dewPointC(toC(tF), rh)) : null;
 
     const cells = [
       new Date(f.created_at).toLocaleString(),
-      fmt(t),
-      fmt(h, 0),
-      "—",          // pressure: no sensor yet
-      fmt(dp),
-      "—",          // altimeter: needs pressure
+      fmt(num(f.field4)),
+      fmt(num(f.field5)),
+      fmt(tF),
+      fmt(rh, 0),
+      fmt(num(f.field3)),
+      fmt(dpF),
     ];
 
     const tr = document.createElement("tr");
@@ -118,17 +179,16 @@ async function refresh() {
     const res = await fetch(FEED_URL, { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    const feeds = (data.feeds || []).filter(
-      (f) => num(f.field1) !== null || num(f.field2) !== null
+    const feeds = (data.feeds || []).filter((f) =>
+      ["field1", "field2", "field3", "field4", "field5"].some((k) => num(f[k]) !== null)
     );
 
     if (feeds.length > 0) {
-      const latest = feeds[feeds.length - 1];
-      lastReadingTime = new Date(latest.created_at);
-      updateCards(latest);
+      lastReadingTime = new Date(feeds[feeds.length - 1].created_at);
     } else {
       $("status").textContent = "No readings received yet.";
     }
+    updateCards(feeds);
     updateTable(feeds);
     updateStatus();
   } catch (err) {

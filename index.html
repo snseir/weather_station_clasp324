@@ -28,7 +28,7 @@
         <section aria-labelledby="overview-heading">
             <h2 id="overview-heading">Overview</h2>
             <p>
-                Having accurate information about local weather conditions is important for keeping people safe. 
+                Having accurate information about local weather conditions is important for keeping people safe.
                 Inspired by airport Automated Weather Observing Systems (AWOS) and the National Weather Service’s SKYWARN Storm Spotter Program, our project aims to build a weather station that measures and reports conditions to support informed decisions in aviation and severe weather preparedness.
             </p>
         </section>
@@ -36,7 +36,7 @@
         <section aria-labelledby="status-heading">
             <h2 id="status-heading">Live Status</h2>
             <p>
-                Readings are sent by the weather station to ThingSpeak and this
+                Readings are sent by the weather station to ThingSpeak every 20 seconds, and this
                 page refreshes automatically every 20 seconds.
             </p>
             <p>
@@ -49,101 +49,93 @@
             </p>
         </section>
 
-        <section aria-labelledby="findings-heading">
-            <h2 id="findings-heading">Processed and Validated Data</h2>
+        <section aria-labelledby="conditions-heading">
+            <h2 id="conditions-heading">Conditions &mdash; Last 60 Minutes</h2>
             <p>
-                Wind speed and wind direction measurements. Validation and
-                error analysis are in progress.
+                Each box shows the <strong>average over the last 60 minutes</strong> of readings,
+                except Peak Gust, which shows the <strong>highest gust in the last 60 minutes</strong>.
+                <span id="hour-count"></span>
             </p>
-            <p>
-                Wind speed measurements will be prioritized for processing, validation, and error analysis.
-                Additional readings, such as temperature and pressure, will enhance the station’s weather reporting 
-                and help prototype and test the data collection process from the Arduino to the website.
+            <p class="note">
+                <strong>How gusts are measured:</strong> the station counts anemometer pulses every second.
+                A gust is the wind speed averaged over a rolling <strong>3-second</strong> window
+                (recomputed every second). Each 20-second upload reports the highest 3-second gust
+                in that 20 seconds, and the Peak Gust box shows the highest of those over the last hour.
+                Wind speed is the average over each 20-second upload period.
+            </p>
+            <p class="note">
+                Wind speed is being prioritized for validation and error analysis. Temperature,
+                humidity and pressure readings have not been validated yet.
             </p>
 
             <div class="cards">
                 <div class="card">
                     <h3>Wind Speed</h3>
-                    <p class="reading"><span id="live-speed">&mdash;</span> <span class="unit">mph</span></p>
+                    <p class="reading"><span id="avg-wind">&mdash;</span> <span class="unit">mph</span></p>
+                    <p class="note">60-min average</p>
                 </div>
-            </div>
-
-            <h3>Recent wind readings</h3>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th scope="col">Time</th>
-                            <th scope="col">Wind speed (mph)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="wind-log">
-                        <tr><td colspan="3">No wind sensor connected yet.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <section aria-labelledby="analysis-heading">
-            <h2 id="analysis-heading">Unvalidated Data</h2>
-            <p>
-                This data is collected from the Arduino Weather Station, but
-                validation and error analysis have not been completed.
-            </p>
-
-            <div class="cards">
+                <div class="card">
+                    <h3>Peak Gust</h3>
+                    <p class="reading"><span id="max-gust">&mdash;</span> <span class="unit">mph</span></p>
+                    <p class="note">Highest 3-s gust, last 60 min</p>
+                </div>
                 <div class="card">
                     <h3>Temperature</h3>
-                    <p class="reading"><span id="live-temp">&mdash;</span> <span class="unit">&deg;C</span></p>
-                    <p class="note" id="live-temp-f"></p>
+                    <p class="reading"><span id="avg-temp">&mdash;</span> <span class="unit">&deg;F</span></p>
+                    <p class="note" id="avg-temp-c">60-min average</p>
                 </div>
                 <div class="card">
                     <h3>Humidity</h3>
-                    <p class="reading"><span id="live-humidity">&mdash;</span> <span class="unit">%</span></p>
-                    <p class="note">Relative humidity</p>
+                    <p class="reading"><span id="avg-humidity">&mdash;</span> <span class="unit">%</span></p>
+                    <p class="note">Relative humidity, 60-min average</p>
                 </div>
                 <div class="card">
                     <h3>Pressure</h3>
-                    <p class="reading"><span id="live-pressure">&mdash;</span> <span class="unit">hPa</span></p>
-                    <p class="note" id="live-pressure-inhg">No pressure sensor yet</p>
+                    <p class="reading"><span id="avg-pressure">&mdash;</span> <span class="unit">hPa</span></p>
+                    <p class="note" id="avg-pressure-inhg">Station pressure, 60-min average</p>
                 </div>
                 <div class="card">
                     <h3>Dew Point</h3>
-                    <p class="reading"><span id="live-dewpoint">&mdash;</span> <span class="unit">&deg;C</span></p>
-                    <p class="note" id="live-dewpoint-f"></p>
+                    <p class="reading"><span id="avg-dewpoint">&mdash;</span> <span class="unit">&deg;F</span></p>
+                    <p class="note" id="avg-dewpoint-c">From 60-min average temp &amp; humidity</p>
                 </div>
                 <div class="card">
                     <h3>Altimeter Setting</h3>
-                    <p class="reading"><span id="live-altimeter">&mdash;</span> <span class="unit">inHg</span></p>
-                    <p class="note" id="live-altimeter-hpa">Needs pressure sensor</p>
+                    <p class="reading"><span id="avg-altimeter">&mdash;</span> <span class="unit">inHg</span></p>
+                    <p class="note" id="avg-altimeter-note">From 60-min average pressure</p>
                 </div>
             </div>
 
-            <h3>Live charts (ThingSpeak)</h3>
+            <h3>Live charts (ThingSpeak, one point every 20 s)</h3>
             <div class="charts">
                 <iframe title="Wind speed chart"
-                    src="https://thingspeak.com/channels/3580074/charts/4?bgcolor=%23ffffff&color=%232e8b57&dynamic=true&results=60&type=line&update=15&title=Wind%20Speed%20(mph)"></iframe>
+                    src="https://thingspeak.com/channels/3580074/charts/4?bgcolor=%23ffffff&color=%232e8b57&dynamic=true&results=60&type=line&update=15&title=Wind%20Speed%20(mph%2C%2020-s%20avg)"></iframe>
+                <iframe title="Peak gust chart"
+                    src="https://thingspeak.com/channels/3580074/charts/5?bgcolor=%23ffffff&color=%23e07b00&dynamic=true&results=60&type=line&update=15&title=Peak%20Gust%20(mph%2C%20max%203-s%20per%2020%20s)"></iframe>
                 <iframe title="Temperature chart"
-                    src="https://thingspeak.com/channels/3580074/charts/1?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=60&type=line&update=15&title=Temperature%20(%C2%B0C)"></iframe>
+                    src="https://thingspeak.com/channels/3580074/charts/1?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=60&type=line&update=15&title=Temperature%20(%C2%B0F)"></iframe>
                 <iframe title="Humidity chart"
                     src="https://thingspeak.com/channels/3580074/charts/2?bgcolor=%23ffffff&color=%231f6fd6&dynamic=true&results=60&type=line&update=15&title=Humidity%20(%25)"></iframe>
+                <iframe title="Pressure chart"
+                    src="https://thingspeak.com/channels/3580074/charts/3?bgcolor=%23ffffff&color=%236a3d9a&dynamic=true&results=60&type=line&update=15&title=Pressure%20(hPa)"></iframe>
             </div>
 
-            <h3>Recent readings</h3>
+            <h3>Recent readings (every 20 s)</h3>
             <div class="table-wrap">
                 <table>
                     <thead>
                         <tr>
                             <th scope="col">Time</th>
-                            <th scope="col">Temperature (&deg;C)</th>
+                            <th scope="col">Wind speed (mph, 20-s avg)</th>
+                            <th scope="col">Peak gust (mph, max 3-s in 20 s)</th>
+                            <th scope="col">Temperature (&deg;F)</th>
                             <th scope="col">Humidity (%)</th>
                             <th scope="col">Pressure (hPa)</th>
-                            <th scope="col">Dew point (&deg;C)</th>
-                            <th scope="col">Altimeter (inHg)</th>
+                            <th scope="col">Dew point (&deg;F)</th>
                         </tr>
                     </thead>
                     <tbody id="env-log">
-                        <tr><td colspan="6">Loading&hellip;</td></tr>
+                        <tr><td colspan="7">Loading&hellip;</td></tr>
                     </tbody>
                 </table>
             </div>
