@@ -57,14 +57,16 @@
             <p>
                 Each box shows the <strong>average over the last 60 minutes</strong> of readings,
                 except Peak Gust, which shows the <strong>highest gust in the last 60 minutes</strong>.
-                [<span id="hour-count"></span>]
+                <span id="hour-count"></span>
             </p>
             <p class="note">
-                <strong>How gusts are measured:</strong> the Arduino counts anemometer pulses every second.
-                A gust is the wind speed averaged over a rolling <strong>3-second</strong> window
-                (recomputed every second). Each 20-second upload reports the highest 3-second gust
-                in that 20 seconds, and the Peak Gust box shows the highest of those over the last hour.
-                Wind speed is the average over each 20-second upload period.
+                <strong>How wind is measured (same method as airport ASOS stations):</strong>
+                every 5 seconds the station turns the anemometer pulses into one
+                <strong>5-second average</strong> wind speed.
+                <strong>Wind speed</strong> is the <strong>2-minute average</strong> of the most recent
+                24 five-second averages. A <strong>gust</strong> is a single 5-second average; each
+                20-second upload reports the highest one in those 20 seconds, and the Peak Gust box
+                shows the highest over the last hour.
             </p>
             <p class="note">
                 Wind speed is being prioritized for validation and error analysis. Temperature,
@@ -75,12 +77,12 @@
                 <div class="card">
                     <h3>Wind Speed</h3>
                     <p class="reading"><span id="avg-wind">&mdash;</span> <span class="unit">mph</span></p>
-                    <p class="note">60-min average</p>
+                    <p class="note">60-min average of the 2-min wind</p>
                 </div>
                 <div class="card">
                     <h3>Peak Gust</h3>
                     <p class="reading"><span id="max-gust">&mdash;</span> <span class="unit">mph</span></p>
-                    <p class="note">Highest 3-s gust, last 60 min</p>
+                    <p class="note">Highest 5-s average, last 60 min</p>
                 </div>
                 <div class="card">
                     <h3>Temperature</h3>
@@ -112,9 +114,9 @@
             <h3>Live charts (ThingSpeak, one point every 20 s)</h3>
             <div class="charts">
                 <iframe title="Wind speed chart"
-                    src="https://thingspeak.com/channels/3580074/charts/4?bgcolor=%23ffffff&color=%232e8b57&dynamic=true&results=60&type=line&update=15&title=Wind%20Speed%20(mph%2C%2020-s%20avg)"></iframe>
+                    src="https://thingspeak.com/channels/3580074/charts/4?bgcolor=%23ffffff&color=%232e8b57&dynamic=true&results=60&type=line&update=15&title=Wind%20Speed%20(mph%2C%202-min%20avg)"></iframe>
                 <iframe title="Peak gust chart"
-                    src="https://thingspeak.com/channels/3580074/charts/5?bgcolor=%23ffffff&color=%23e07b00&dynamic=true&results=60&type=line&update=15&title=Peak%20Gust%20(mph%2C%20max%203-s%20per%2020%20s)"></iframe>
+                    src="https://thingspeak.com/channels/3580074/charts/5?bgcolor=%23ffffff&color=%23e07b00&dynamic=true&results=60&type=line&update=15&title=Peak%20Gust%20(mph%2C%20max%205-s%20per%2020%20s)"></iframe>
                 <iframe title="Temperature chart"
                     src="https://thingspeak.com/channels/3580074/charts/1?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=60&type=line&update=15&title=Temperature%20(%C2%B0F)"></iframe>
                 <iframe title="Humidity chart"
@@ -129,8 +131,8 @@
                     <thead>
                         <tr>
                             <th scope="col">Time</th>
-                            <th scope="col">Wind speed (mph, 20-s avg)</th>
-                            <th scope="col">Peak gust (mph, max 3-s in 20 s)</th>
+                            <th scope="col">Wind speed (mph, 2-min avg)</th>
+                            <th scope="col">Peak gust (mph, max 5-s in 20 s)</th>
                             <th scope="col">Temperature (&deg;F)</th>
                             <th scope="col">Humidity (%)</th>
                             <th scope="col">Pressure (inHg)</th>

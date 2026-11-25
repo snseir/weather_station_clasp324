@@ -2,8 +2,8 @@
   Arduino Weather Station - live data from ThingSpeak
   The station uploads one entry every 20 s:
     field1 = Temperature (F)      field2 = Humidity (%)
-    field3 = Pressure (inHg)     field4 = Wind speed, 20-s average (mph)
-    field5 = Peak gust in those 20 s (highest rolling 3-second average, mph)
+    field3 = Pressure (inHg)     field4 = Wind speed, 2-min average (mph)
+    field5 = Peak gust in those 20 s (highest 5-second average, mph) - ASOS method
   The channel must be public for this to work without an API key.
 
   The cards show averages over the last 60 minutes (Peak Gust shows the maximum).
@@ -18,7 +18,7 @@ const FETCH_ROWS = 200;                // > 180 entries per hour at one per 20 s
 
 // Station elevation (meters above sea level, including the roof height).
 // Needed for the altimeter setting. Leave as null until it is known.
-const STATION_ELEVATION_M = 182;
+const STATION_ELEVATION_M = null;
 
 const FEED_URL =
   `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?results=${FETCH_ROWS}`;
