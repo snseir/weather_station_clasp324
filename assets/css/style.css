@@ -296,6 +296,9 @@ td {
 thead th {
     background: var(--um-blue);
     color: var(--um-maize);
+    font-size: 0.8rem;       /* smaller header text */
+    white-space: nowrap;     /* keep each header on one line */
+    padding: 0.5rem 0.6rem;
 }
 
 tbody tr:nth-child(even) {

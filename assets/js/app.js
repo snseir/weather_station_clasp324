@@ -28,6 +28,7 @@ const $ = (id) => document.getElementById(id);
 const toC = (f) => (f - 32) * 5 / 9;
 const toF = (c) => c * 9 / 5 + 32;
 const hPaToInHg = (p) => p * 0.0295300;
+const mphToKt = (v) => v * 0.868976;
 
 // Dew point from temperature (C) and relative humidity (%) - Magnus formula
 function dewPointC(tC, rh) {
@@ -107,7 +108,14 @@ function updateCards(feeds) {
     : "(No readings in the last 60 minutes.)";
 
   $("avg-wind").textContent = fmt(wind);
+  $("avg-wind-kt").textContent = wind === null
+    ? "60-min average of the 2-min wind"
+    : `${fmt(mphToKt(wind))} kt · 60-min average of the 2-min wind`;
+
   $("max-gust").textContent = fmt(gust);
+  $("max-gust-kt").textContent = gust === null
+    ? "Highest 5-s average, last 60 min"
+    : `${fmt(mphToKt(gust))} kt · highest 5-s average, last 60 min`;
 
   $("avg-temp").textContent = fmt(tF);
   $("avg-temp-c").textContent = tF === null

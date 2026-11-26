@@ -77,12 +77,12 @@
                 <div class="card">
                     <h3>Wind Speed</h3>
                     <p class="reading"><span id="avg-wind">&mdash;</span> <span class="unit">mph</span></p>
-                    <p class="note">60-min average of the 2-min wind</p>
+                    <p class="note" id="avg-wind-kt">60-min average of the 2-min wind</p>
                 </div>
                 <div class="card">
                     <h3>Peak Gust</h3>
                     <p class="reading"><span id="max-gust">&mdash;</span> <span class="unit">mph</span></p>
-                    <p class="note">Highest 5-s average, last 60 min</p>
+                    <p class="note" id="max-gust-kt">Highest 5-s average, last 60 min</p>
                 </div>
                 <div class="card">
                     <h3>Temperature</h3>
@@ -126,15 +126,17 @@
             </div>
 
             <h3>Recent readings (every 20 s)</h3>
+            <p class="note">Wind = 2-minute average. Gust = highest 5-second average in each 20 s.
+                RH = relative humidity. Pressure = station pressure.</p>
             <div class="table-wrap">
                 <table>
                     <thead>
                         <tr>
                             <th scope="col">Time</th>
-                            <th scope="col">Wind speed (mph, 2-min avg)</th>
-                            <th scope="col">Peak gust (mph, max 5-s in 20 s)</th>
-                            <th scope="col">Temperature (&deg;F)</th>
-                            <th scope="col">Humidity (%)</th>
+                            <th scope="col">Wind (mph)</th>
+                            <th scope="col">Gust (mph)</th>
+                            <th scope="col">Temp (&deg;F)</th>
+                            <th scope="col">RH (%)</th>
                             <th scope="col">Pressure (inHg)</th>
                             <th scope="col">Dew point (&deg;F)</th>
                         </tr>
