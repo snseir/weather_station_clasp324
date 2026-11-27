@@ -48,7 +48,10 @@
             <p>
                 <a class="button secondary" id="download-btn"
                    href="https://api.thingspeak.com/channels/3580074/feeds.csv?results=8000"
-                   download="weather_station_readings.csv">Download all readings (CSV from ThingSpeak feed)</a>
+                   download="weather_station_readings.csv">Download full history (CSV)</a>
+            </p>
+            <p class="note" id="download-note">
+                Every reading since the channel was last cleared (one row per 20 s). Large histories take a few seconds to gather.
             </p>
         </section>
 
