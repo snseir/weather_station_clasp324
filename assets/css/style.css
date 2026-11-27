@@ -317,3 +317,40 @@ tbody tr:nth-child(even) {
     border: 1px solid #ccc;
     border-radius: 6px;
 }
+/* ---------- Complete History page ---------- */
+.history-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    margin: 1rem 0;
+}
+
+.toggle {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    margin: 0;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+}
+
+.toggle legend {
+    padding: 0 0.3rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.toggle label {
+    cursor: pointer;
+}
+
+.history-plot {
+    width: 100%;
+    min-height: 960px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+}

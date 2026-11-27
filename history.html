@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Every reading the Arduino Weather Station has recorded, plotted over time.">
+    <title>Complete History | Arduino Weather Station</title>
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32.png">
+    <link rel="apple-touch-icon" href="assets/images/favicon-180.png">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <header class="site-header">
+        <div class="container header-content">
+            <a class="site-title" href="index.html">Arduino Weather Station</a>
+
+            <nav aria-label="Main navigation">
+                <a href="index.html">Data</a>
+                <a href="history.html" aria-current="page">Complete History</a>
+                <a href="sources.html">Sources &amp; Methodology</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main-content" class="container">
+        <h1>Complete History</h1>
+        <p class="intro">Every reading the weather station has sent to ThingSpeak, plotted over time.</p>
+
+        <section aria-labelledby="history-heading">
+            <h2 id="history-heading">All Data Collected</h2>
+            <p>
+                <span id="history-status" class="status" role="status" aria-live="polite">Loading every reading&hellip;</span>
+            </p>
+
+            <div class="history-controls">
+                <fieldset class="toggle">
+                    <legend>Show</legend>
+                    <label><input type="radio" name="resolution" value="hourly" checked> Hourly averages</label>
+                    <label><input type="radio" name="resolution" value="raw"> Every reading (20 s)</label>
+                </fieldset>
+                <a class="button secondary" id="download-btn"
+                   href="https://api.thingspeak.com/channels/3580074/feeds.csv?results=8000"
+                   download="weather_station_readings.csv">Download full history (CSV)</a>
+            </div>
+
+            <p class="note">
+                Wind is the 2-minute average and gust is the highest 5-second average (ASOS method).
+                In hourly view, wind, temperature, humidity, pressure and dew point are averaged over each hour
+                and gust is the highest in that hour. Gaps in the lines are times the station was not uploading.
+                Drag across a plot to zoom, double-click to zoom back out, and use the buttons above the
+                plots to jump to the last day, 3 days or week.
+            </p>
+
+            <div id="history-plot" class="history-plot" aria-label="Plots of wind, temperature, humidity and pressure over time"></div>
+        </section>
+    </main>
+
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/history.js"></script>
+</body>
+</html>
